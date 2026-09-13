@@ -66,12 +66,23 @@ git pull
 git switch -c ANT-12-lexer-del-mini-lenguaje
 ```
 
-**`main` no acepta commits directos.** Esto es una regla de disciplina, **no
-esta forzada por GitHub**: la proteccion de rama y los rulesets requieren
-GitHub Pro cuando el repositorio es privado, y este lo es. La API responde
-`403: Upgrade to GitHub Pro or make this repository public`. Se eligio
-mantenerlo privado y sostener la regla a mano; si algun dia el repo se hace
-publico, lo primero es activar la proteccion de verdad.
+**`main` no acepta commits directos, y esto SI esta forzado por GitHub.** Un
+`git push` a `main` se rechaza en el servidor:
+
+```
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+```
+
+El ruleset «main protegida» exige pull request, prohibe borrar la rama y
+prohibe el force-push, y **solo permite squash** como metodo de mezcla, que es
+el que usa el ciclo de abajo.
+
+> Esto no siempre fue asi. El repositorio nacio **privado**, y ahi los rulesets
+> requieren GitHub Pro: la API respondia `403: Upgrade to GitHub Pro or make
+> this repository public`. La regla existia solo como disciplina. Se hizo
+> publico precisamente para cerrar ese hueco, y de paso quedaron activos el
+> escaneo de secretos y la proteccion de push, que en privado tampoco estaban.
 
 ## El ciclo de un ticket
 
@@ -88,6 +99,24 @@ publico, lo primero es activar la proteccion de verdad.
 
 El paso 6 no es burocracia: es el unico momento en que ves el cambio como lo
 veria otra persona.
+
+El paso 7 usa `--squash` porque el ruleset de `main` **no admite otra cosa**:
+ni merge commit ni rebase. Un historial plano, un commit por ticket.
+
+## Secretos
+
+El repositorio es **publico**. Nada de credenciales dentro, nunca.
+
+- El `.env` real esta en `.gitignore` y no debe salir de tu maquina. Lo que se
+  versiona es `.env.example`, con los nombres de las variables y valores de
+  mentira.
+- GitHub tiene **push protection** activa: si intentas subir algo que parezca
+  una credencial, el push se rechaza antes de que llegue al servidor. Es una
+  red, no un permiso para descuidarse.
+- Los `secret_key_base` de `config/dev.exs` y `config/test.exs` **si** estan
+  versionados. Es lo que hace `phx.new` y no es un descuido: firman cookies de
+  un servidor que solo escucha en `localhost`. El de produccion sale de la
+  variable `SECRET_KEY_BASE` en `config/runtime.exs` y no vive en el codigo.
 
 ## Definicion de terminado
 
