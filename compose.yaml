@@ -1,0 +1,67 @@
+name: hormiguero
+
+services:
+  db:
+    # Version mayor FIJADA. Con `postgres:latest` un dia cualquiera la base
+    # cambia de version mayor sola y el volumen de datos deja de abrir.
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hormiguero}
+      # `:?mensaje` hace que compose ABORTE con un error legible si falta la
+      # variable. Sin eso levantaria una base con contrasena vacia, en
+      # silencio, y el fallo aparece mucho despues.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:-hormiguero_dev}
+    ports:
+      # 5433 y no 5432: asi no choca con un Postgres nativo ni con otro
+      # proyecto. Y el `127.0.0.1:` del principio NO es opcional: sin el,
+      # Docker publica el puerto en TODA la red local saltandose el firewall,
+      # porque sus reglas se insertan por delante de las de nftables.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      # Volumen con NOMBRE, no un bind mount a una carpeta del repo: los
+      # datos de Postgres en un bind mount acaban en lios de permisos y de
+      # rendimiento en Linux.
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Esto no es adorno. `depends_on` sin `condition: service_healthy` solo
+      # espera a que el contenedor ARRANQUE, no a que Postgres acepte
+      # conexiones, y la app truena en el primer intento.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hormiguero} -d ${POSTGRES_DB:-hormiguero_dev}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  app:
+    # Solo con `docker compose --profile full up`. En el dia a dia Phoenix
+    # corre NATIVO en el devShell: la recarga al guardar es instantanea y no
+    # hay permisos de archivos que pelear. Este perfil existe para comprobar
+    # que todo arranca desde cero, como lo haria en un servidor.
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      DATABASE_URL: ecto://${POSTGRES_USER:-hormiguero}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB:-hormiguero_dev}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      PHX_HOST: localhost
+      PHX_PORT: "4000"
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      # _build y deps en volumenes propios: si se compartieran con el host,
+      # los artefactos compilados dentro del contenedor pisarian a los del
+      # devShell, que son de otra plataforma.
+      - build:/app/_build
+      - deps:/app/deps
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  build:
+  deps:
