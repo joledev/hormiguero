@@ -1,21 +1,16 @@
-# Nix / direnv
+# --- Nix / direnv -----------------------------------------------------
 #
-# .nix-mix y .nix-hex los crea el shellHook de flake.nix: Mix y Hex guardan
-# ahi sus cosas para no ensuciar el $HOME. .direnv/ es la cache de nix-direnv
-# (ticket ANT-3).
+# Esta seccion NO la pone phx.new: se vuelve a agregar a mano cada vez que
+# el generador sobrescriba este archivo.
+#
+# .nix-mix y .nix-hex los crea el shellHook de flake.nix. Ahi viven el
+# MIX_HOME y el HEX_HOME del proyecto, incluido el archivo phx_new, para no
+# ensuciar el $HOME. .direnv/ es la cache de nix-direnv.
 .direnv/
 .nix-mix/
 .nix-hex/
 result
 result-*
-
-# Elixir / Mix
-/_build/
-/deps/
-/cover/
-/doc/
-*.ez
-erl_crash.dump
 
 # Cache de ElixirLS. El servidor lo escribe dentro del proyecto al indexar.
 .elixir_ls/
@@ -25,3 +20,41 @@ erl_crash.dump
 .env
 .env.*
 !.env.example
+
+# The directory Mix will write compiled artifacts to.
+/_build/
+
+# If you run "mix test --cover", coverage assets end up here.
+/cover/
+
+# The directory Mix downloads your dependencies sources to.
+/deps/
+
+# Where 3rd-party dependencies like ExDoc output generated docs.
+/doc/
+
+# Ignore .fetch files in case you like to edit your project deps locally.
+/.fetch
+
+# If the VM crashes, it generates a dump, let's ignore it too.
+erl_crash.dump
+
+# Also ignore archive artifacts (built via "mix archive.build").
+*.ez
+
+# Temporary files, for example, from tests.
+/tmp/
+
+# Ignore package tarball (built via "mix hex.build").
+hormiguero-*.tar
+
+# Ignore assets that are produced by build tools.
+/priv/static/assets/
+
+# Ignore digested assets cache.
+/priv/static/cache_manifest.json
+
+# In case you use Node.js/npm, you want to ignore these.
+npm-debug.log
+/assets/node_modules/
+
