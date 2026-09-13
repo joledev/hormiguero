@@ -1,0 +1,8 @@
+# Mix y Hex viven dentro del proyecto (ver el shellHook de flake.nix), asi
+# que sus directorios aparecen aqui y NO deben entrar al repositorio.
+.nix-mix/
+.nix-hex/
+
+# `nix build` deja este enlace al /nix/store.
+result
+result-*
