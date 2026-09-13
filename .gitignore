@@ -1,3 +1,26 @@
+# --- Nix / direnv -----------------------------------------------------
+#
+# Esta seccion NO la pone phx.new: se vuelve a agregar a mano cada vez que
+# el generador sobrescriba este archivo.
+#
+# .nix-mix y .nix-hex los crea el shellHook de flake.nix. Ahi viven el
+# MIX_HOME y el HEX_HOME del proyecto, incluido el archivo phx_new, para no
+# ensuciar el $HOME. .direnv/ es la cache de nix-direnv.
+.direnv/
+.nix-mix/
+.nix-hex/
+result
+result-*
+
+# Cache de ElixirLS. El servidor lo escribe dentro del proyecto al indexar.
+.elixir_ls/
+
+# Secretos y entorno local. El .env.example SI se versiona: es la plantilla
+# que dice QUE variables hacen falta, sin sus valores.
+.env
+.env.*
+!.env.example
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 
