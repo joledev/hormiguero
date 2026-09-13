@@ -1,8 +1,27 @@
-# Mix y Hex viven dentro del proyecto (ver el shellHook de flake.nix), asi
-# que sus directorios aparecen aqui y NO deben entrar al repositorio.
+# Nix / direnv
+#
+# .nix-mix y .nix-hex los crea el shellHook de flake.nix: Mix y Hex guardan
+# ahi sus cosas para no ensuciar el $HOME. .direnv/ es la cache de nix-direnv
+# (ticket ANT-3).
+.direnv/
 .nix-mix/
 .nix-hex/
-
-# `nix build` deja este enlace al /nix/store.
 result
 result-*
+
+# Elixir / Mix
+/_build/
+/deps/
+/cover/
+/doc/
+*.ez
+erl_crash.dump
+
+# Cache de ElixirLS. El servidor lo escribe dentro del proyecto al indexar.
+.elixir_ls/
+
+# Secretos y entorno local. El .env.example SI se versiona: es la plantilla
+# que dice QUE variables hacen falta, sin sus valores.
+.env
+.env.*
+!.env.example
